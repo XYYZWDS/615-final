@@ -1,12 +1,13 @@
 library(ggplot2)
 library(tidyverse)
-library(rnaturalearth)
 library(sf)
 library(png)
 library(rsconnect)
 library(shiny)
 library(rnaturalearthdata)
 library(leaflet)
+library(shinythemes)
+library(rnaturalearth)
 
 # Get world map data
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -53,7 +54,7 @@ gdp_growth_data_long <- na.omit(gdp_growth_data_long)
 gdp_growth_plot <- ggplot(gdp_growth_data_long, aes(x=year, y=value)) + 
   geom_line() + 
   geom_point() +
-  ggtitle("GDP Growth Rate of Cyprus (Yearly)") + 
+  ggtitle("GDP Growth Rate of cyprus_coords (Yearly)") + 
   xlab("Year") + 
   ylab("GDP Growth Rate (%)")
 
@@ -75,7 +76,7 @@ imports_data_long <- filter(data_long, grepl("Merchandise imports", Indicator.Na
 trade_plot <- ggplot() +
   geom_line(data=exports_data_long, aes(x=year, y=value, group=Indicator.Name, color="Exports")) +
   geom_line(data=imports_data_long, aes(x=year, y=value, group=Indicator.Name, color="Imports")) +
-  ggtitle("Merchandise Exports and Imports of Cyprus (Yearly)") +
+  ggtitle("Merchandise Exports and Imports of cyprus_coords (Yearly)") +
   xlab("Year") + ylab("Amount (US$)") +
   scale_color_manual(values=c("Exports"="blue", "Imports"="red")) +
   theme(legend.position = "bottom")
@@ -91,14 +92,14 @@ unemployment_data_long <- filter(data_long, grepl("Unemployment", Indicator.Name
 inflation_plot <- ggplot(inflation_data_long, aes(x=year, y=value)) +
   geom_line(color="orange") +
   geom_point() +
-  ggtitle("Inflation Rate in Cyprus (Yearly)") +
+  ggtitle("Inflation Rate in Northern Cyprus (Yearly)") +
   xlab("Year") +
   ylab("Inflation Rate (%)")
 
 unemployment_plot <- ggplot(unemployment_data_long, aes(x=year, y=value)) +
   geom_line(color="green") +
   geom_point() +
-  ggtitle("Unemployment Rate in Cyprus (Yearly)") +
+  ggtitle("Unemployment Rate in Northern Cyprus (Yearly)") +
   xlab("Year") +
   ylab("Unemployment Rate (%)")
 
@@ -206,8 +207,8 @@ years_unr <- as.numeric(1991:2022)
 p_unr_car <- ggplot() +
   geom_line(aes(x = years_unr, y = cyprus_unemployment_values, colour = "Cyprus Unemployment Rate")) +
   geom_line(aes(x = years_unr, y = greece_unemployment_values, colour = "Greece Unemployment Rate")) +
-  labs(title = "Unemployment Rate Comparison (Cyprus vs Greece)", x = "Year", y = "Unemployment Rate (%)") +
-  scale_colour_manual(values = c("Cyprus Unemployment Rate" = "blue", "Greece Unemployment Rate" = "red"))
+  labs(title = "Unemployment Rate Comparison (Northern Cyprus vs Greece)", x = "Year", y = "Unemployment Rate (%)") +
+  scale_colour_manual(values = c("Northern Cyprus Unemployment Rate" = "blue", "Greece Unemployment Rate" = "red"))
 
 
 # Creating Unemployment Rate table
@@ -227,10 +228,10 @@ years_edu <- as.numeric(1973:2022)
 
 
 p_edu_car <- ggplot() +
-  geom_line(aes(x = years_edu, y = cyprus_education_values, colour = "Cyprus Education Expenditure")) +
+  geom_line(aes(x = years_edu, y = cyprus_education_values, colour = "Northern Cyprus Education Expenditure")) +
   geom_line(aes(x = years_edu, y = greece_education_values, colour = "Greece Education Expenditure")) +
-  labs(title = "Education Expenditure Comparison (Cyprus vs Greece)", x = "Year", y = "Education Expenditure (% of GDP)") +
-  scale_colour_manual(values = c("Cyprus Education Expenditure" = "blue", "Greece Education Expenditure" = "red"))
+  labs(title = "Education Expenditure Comparison (Northern Cyprus vs Greece)", x = "Year", y = "Education Expenditure (% of GDP)") +
+  scale_colour_manual(values = c("Northern Cyprus Education Expenditure" = "blue", "Greece Education Expenditure" = "red"))
 
 # Creating Education Expenditure table
 education_table <- data.frame(
@@ -258,7 +259,63 @@ unemployment_table<-tail(unemployment_table,10)
 education_table <-tail(education_table,10)
 
 
+strengths_indicators <- data %>% 
+  filter(Indicator.Name %in% c('GDP, PPP (current international $)', 
+                               'GNI, PPP (current international $)',
+                               'Imports of goods, services and primary income (BoP, current US$)',
+                               'Exports of goods, services and primary income (BoP, current US$)'))
 
+weaknesses_indicators <- data %>% 
+  filter(Indicator.Name %in% c('Foreign direct investment, net (BoP, current US$)', 
+                               'Current account balance (BoP, current US$)'))
+
+
+
+strengths_plot_data <- strengths_indicators %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Value") %>%
+  mutate(Year = as.numeric(sub("X", "", Year)))  
+
+
+weaknesses_plot_data <- weaknesses_indicators %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Value") %>%
+  mutate(Year = as.numeric(sub("X", "", Year)))
+
+strengths_plot <- ggplot(strengths_plot_data, aes(x = Year, y = Value, color = Indicator.Name)) +
+  geom_line() +
+  labs(title = "Strengths: Key Economic Indicators", x = "Year", y = "Value (US$)") +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",  
+    legend.text = element_text(size = 10),  
+    legend.title = element_text(size = 12),  
+    legend.key.size = unit(1, 'lines'),  
+    legend.box = "vertical",  
+    legend.margin = margin(t = 0, b = 0, l = 0, r = 0),  
+    plot.margin = unit(c(1, 1, 1, 1), "cm")  
+  ) +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))  
+
+weaknesses_plot <- ggplot(weaknesses_plot_data, aes(x = Year, y = Value, color = Indicator.Name)) +
+  geom_line() +
+  labs(title = "Weaknesses: Investment and Account Balance", x = "Year", y = "Value (US$)") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 8),  
+        legend.title = element_text(size = 10))  
+
+
+
+
+
+
+
+
+
+
+
+
+# Output for the PNG image
+northern_cyprus <- st_read("northern cyprus.geojson", quiet = TRUE)
 
 
 
@@ -280,9 +337,9 @@ server <- function(input, output) {
       return(tabsetPanel(
         tabPanel("Map 1",
                  plotOutput("mapPlot"),
-                 HTML("<h3>World Map Highlighting Cyprus</h3>
+                 HTML("<h3>World Map Highlighting Northern Cyprus</h3>
 <p>
-    <strong>The first image is a world map highlighting the location of Cyprus.</strong> Cyprus is distinctly marked, showcasing its strategic position as an island country in the Eastern Mediterranean Sea. Its geographical location is characterized by:
+    <strong>The first image is a world map highlighting the location of Northern Cyprus.</strong> Northern Cyprus is distinctly marked, showcasing its strategic position as an island country in the Eastern Mediterranean Sea. Its geographical location is characterized by:
 </p>
 <ul>
     <li>Being to the <strong>south of Turkey</strong>,</li>
@@ -292,23 +349,23 @@ server <- function(input, output) {
     <li>And <strong>southeast of Greece</strong>.</li>
 </ul>
 <p>
-    The map’s use of a red dot to mark Cyprus effectively draws attention to its unique and central position in the region.
+    The map’s use of a red dot to mark Northern Cyprus effectively draws attention to its unique and central position in the region.
 </p>
 ")
         ),
         tabPanel("Map 2",
                  leafletOutput("map"),
                  
-                 HTML("<h3>Detailed Map of Cyprus</h3>
+                 HTML("<h3>Detailed Map of Northern Cyprus</h3>
 <p>
-    <strong>The second image appears to be a more detailed map of Cyprus itself,</strong> highlighting various administrative regions or cities within the island. Notable features of this map include:
+    <strong>The second image appears to be a more detailed map of Northern Cyprus itself,</strong> highlighting various administrative regions or cities within the island. Notable features of this map include:
 </p>
 <ul>
     <li>The <strong>northern part of the island highlighted in pink</strong>, indicating a region or attribute of special interest, such as a separate administrative area or a zone with special status,</li>
     <li>Inclusion of significant cities like <strong>Girne, Lefkoşa, and Gazimağusa</strong>, which play crucial roles in the country's geography and culture.</li>
 </ul>
 <p>
-    This map provides a closer look at the internal divisions and important urban areas of Cyprus, offering insights into its regional dynamics.
+    This map provides a closer look at the internal divisions and important urban areas of Northern Cyprus, offering insights into its regional dynamics.
 </p>
 ")
         )
@@ -317,9 +374,9 @@ server <- function(input, output) {
       return(tabsetPanel(
         tabPanel("GDP",
                  plotOutput("gdpPlot"),
-                 HTML("<h3>Cyprus Annual GDP Growth Rate Analysis</h3>
+                 HTML("<h3>Northern Cyprus Annual GDP Growth Rate Analysis</h3>
 <p>
-    <strong>This chart shows the annual GDP growth rate of Cyprus.</strong> Significant fluctuations are observed in different years, which may reflect the dynamic nature of the economic environment. Key factors influencing these variations include:
+    <strong>This chart shows the annual GDP growth rate of Northern Cyprus.</strong> Significant fluctuations are observed in different years, which may reflect the dynamic nature of the economic environment. Key factors influencing these variations include:
 </p>
 <ul>
     <li>Changes in the <strong>global economic environment</strong>,</li>
@@ -333,33 +390,33 @@ server <- function(input, output) {
         ),
         tabPanel("Import and Export",
                  plotOutput("tradePlot"),
-                 HTML("<h3>Cyprus Import and Export Analysis</h3>
+                 HTML("<h3>Northern Cyprus Import and Export Analysis</h3>
 <p>
-    <strong>This chart provides a comparative analysis of Cyprus's export and import amounts over recent years.</strong> Key observations and factors influencing these trends include:
+    <strong>This chart provides a comparative analysis of Northern Cyprus's export and import amounts over recent years.</strong> Key observations and factors influencing these trends include:
 </p>
 <ul>
     <li>Fluctuations in export and import amounts, reflecting changes in the <strong>global trade environment</strong>,</li>
     <li>Impact of <strong>international market demand</strong>,</li>
-    <li>And Cyprus's <strong>domestic production capacity</strong>.</li>
+    <li>And Northern Cyprus's <strong>domestic production capacity</strong>.</li>
 </ul>
 <p>
-    By examining the scale of exports versus imports, insights into Cyprus's trade balance are gained. A significant excess of imports over exports in any particular year, for instance, might indicate a <strong>trade deficit</strong>, highlighting economic challenges.
+    By examining the scale of exports versus imports, insights into Northern Cyprus's trade balance are gained. A significant excess of imports over exports in any particular year, for instance, might indicate a <strong>trade deficit</strong>, highlighting economic challenges.
 </p>
 ")
         ),
         tabPanel("Inflation and Unemployment Rates",
                  plotOutput("inflationPlot"),
                  plotOutput("unemploymentPlot"),
-                 HTML("<h3>Inflation and Unemployment Rates in Cyprus</h3>
+                 HTML("<h3>Inflation and Unemployment Rates in Northern Cyprus</h3>
 <p>
-    <strong>The charts displayed showcase the annual inflation rate and unemployment rate in Cyprus.</strong> These indicators provide valuable insights into the country's macroeconomic stability:
+    <strong>The charts displayed showcase the annual inflation rate and unemployment rate in Northern Cyprus.</strong> These indicators provide valuable insights into the country's macroeconomic stability:
 </p>
 <ul>
     <li>The left graph illustrates the <strong>annual inflation rate</strong>, with its fluctuations revealing the stability of consumer prices and monetary value changes,</li>
     <li>The right graph depicts the <strong>annual unemployment rate</strong>, a reflection of the job market's health and the intensity of economic activity.</li>
 </ul>
 <p>
-    Together, these two metrics offer a comprehensive view of Cyprus's macroeconomic conditions. Notably, high rates of inflation or unemployment typically signal underlying economic challenges.
+    Together, these two metrics offer a comprehensive view of Northern Cyprus's macroeconomic conditions. Notably, high rates of inflation or unemployment typically signal underlying economic challenges.
 </p>
 ")
         )
@@ -368,7 +425,7 @@ server <- function(input, output) {
       return(tabsetPanel(
         tabPanel("Population Female",
                  plotOutput("p1"),
-                 HTML("<h3>Female Proportion of the Population in Cyprus</h3>
+                 HTML("<h3>Female Proportion of the Population in Northern Cyprus</h3>
 <p>
     <strong>The chart illustrating the proportion of women in the population</strong> (represented by the blue line) demonstrates:
 </p>
@@ -392,25 +449,25 @@ server <- function(input, output) {
         ),
         tabPanel("Life Expectancy of Women of Reproductive Age",
                  plotOutput("p3"),
-                 HTML("<h3>Life Expectancy of Women of Reproductive Age in Cyprus</h3>
+                 HTML("<h3>Life Expectancy of Women of Reproductive Age in Northern Cyprus</h3>
 <p>
     <strong>Indicated by the red line,</strong> this trend reflects:
 </p>
 <ul>
     <li>An upward trajectory from around 70 years in 1960 to approximately 80 years in recent years,</li>
-    <li>Signifying improvements in health, medical services, and overall quality of life in Cyprus.</li>
+    <li>Signifying improvements in health, medical services, and overall quality of life in Northern Cyprus.</li>
 </ul>
 ")
         ),
         tabPanel("Urban Population to Total Population",
                  plotOutput("p4"),
-                 HTML("<h3>Urban Population Proportion of Total Population in Cyprus</h3>
+                 HTML("<h3>Urban Population Proportion of Total Population in Northern Cyprus</h3>
 <p>
     <strong>Represented by the purple line,</strong> this chart shows:
 </p>
 <ul>
     <li>Growth from less than 40% in 1960 to nearly 70%,</li>
-    <li>Illustrating significant urbanization in Cyprus, likely tied to economic development, increased employment opportunities, and enhanced living facilities.</li>
+    <li>Illustrating significant urbanization in Northern Cyprus, likely tied to economic development, increased employment opportunities, and enhanced living facilities.</li>
 </ul>
 ")
         )
@@ -420,12 +477,12 @@ server <- function(input, output) {
         tabPanel("GDP comparison",
                  plotOutput("p_gdp_car"),
                  tableOutput("gdp_table"),
-                 HTML("<h3>GDP Comparison Between Cyprus and Greece</h3>
+                 HTML("<h3>GDP Comparison Between Northern Cyprus and Greece</h3>
 <p>
-    <strong>Observing the GDP trends of Cyprus and Greece,</strong> we note:
+    <strong>Observing the GDP trends of Northern Cyprus and Greece,</strong> we note:
 </p>
 <ul>
-    <li>Some volatility in both economies, with Greece's GDP generally being higher than that of Cyprus,</li>
+    <li>Some volatility in both economies, with Greece's GDP generally being higher than that of Northern Cyprus,</li>
     <li>Greece's GDP growth rate has been faster over the past few decades despite economic fluctuations,</li>
     <li>Significant declines in GDP for both countries during economic crises, especially post-2008, with Greece being more severely affected.</li>
 </ul>
@@ -434,13 +491,13 @@ server <- function(input, output) {
         tabPanel("Unemployment Rate comparison",
                  plotOutput("p_unr_car"),
                  tableOutput("unemployment_table"),
-                 HTML("<h3>Unemployment Rate Comparison Between Cyprus and Greece</h3>
+                 HTML("<h3>Unemployment Rate Comparison Between Northern Cyprus and Greece</h3>
 <p>
-    <strong>The unemployment rate trends in Cyprus and Greece highlight:</strong>
+    <strong>The unemployment rate trends in Northern Cyprus and Greece highlight:</strong>
 </p>
 <ul>
     <li>Fluctuations in both countries, with Greece's unemployment rate generally higher,</li>
-    <li>A sharp increase in Greece's unemployment rate following the 2008 economic crisis, peaking more significantly than in Cyprus,</li>
+    <li>A sharp increase in Greece's unemployment rate following the 2008 economic crisis, peaking more significantly than in Northern Cyprus,</li>
     <li>A recent downward trend in unemployment rates in both countries, although Greece's decline is slower.</li>
 </ul>
 ")
@@ -448,13 +505,13 @@ server <- function(input, output) {
         tabPanel("Education Expenditure comparison",
                  plotOutput("p_edu_car"),
                  tableOutput("education_table"),
-                 HTML("<h3>Education Expenditure Comparison Between Cyprus and Greece</h3>
+                 HTML("<h3>Education Expenditure Comparison Between Northern Cyprus and Greece</h3>
 <p>
     <strong>Comparing education expenditure as a percentage of GDP,</strong> we find:
 </p>
 <ul>
-    <li>Cyprus generally allocates a higher proportion of its GDP to education than Greece,</li>
-    <li>The proportion of education expenditure in Cyprus usually remains high despite fluctuations,</li>
+    <li>Northern Cyprus generally allocates a higher proportion of its GDP to education than Greece,</li>
+    <li>The proportion of education expenditure in Northern Cyprus usually remains high despite fluctuations,</li>
     <li>Economic instabilities may have impacted the educational investments of both countries, especially during difficult economic periods.</li>
 </ul>
 ")
@@ -462,12 +519,12 @@ server <- function(input, output) {
                     plotOutput("summary_plot"),
                     HTML("<h3>Summary of Comparative Analysis</h3>
 <p>
-    By comparing GDP, unemployment rates, and education expenditure between Cyprus and Greece, we can discern:
+    By comparing GDP, unemployment rates, and education expenditure between Northern Cyprus and Greece, we can discern:
 </p>
 <ul>
     <li>Different economic scales and labor market challenges faced by each country,</li>
-    <li>Greece, with a larger economy, surpasses Cyprus in economic output but struggles with higher unemployment rates and lower education investment ratios,</li>
-    <li>Cyprus, despite its smaller economic scale, demonstrates a higher commitment to education expenditure.</li>
+    <li>Greece, with a larger economy, surpasses Northern Cyprus in economic output but struggles with higher unemployment rates and lower education investment ratios,</li>
+    <li>Northern Cyprus, despite its smaller economic scale, demonstrates a higher commitment to education expenditure.</li>
 </ul>
 <p>
     These differences reflect the distinct economic structures, policy priorities, and challenges of each country.
@@ -477,28 +534,31 @@ server <- function(input, output) {
       ))
     } else if (section == "SWOT Analysis") {
       return(
-        HTML("<h3>SWOT Analysis of Cyprus</h3>
-              <h4>Strengths</h4>
-              <p>- Strategic geographic location<br>
-                 - Robust tourism sector<br>
-                 - Mature service industries<br>
-                 - EU membership benefits</p>
-              <h4>Weaknesses</h4>
-              <p>- Limited economic diversity<br>
-                 - Political division<br>
-                 - Relatively high unemployment rate<br>
-                 - Limited natural resources</p>
-              <h4>Opportunities</h4>
-              <p>- Development of renewable energy<br>
-                 - Diversification in tourism<br>
-                 - Regional cooperation<br>
-                 - Technology and innovation</p>
-              <h4>Threats</h4>
-              <p>- Regional instability<br>
-                 - Impact of global economic fluctuations<br>
-                 - Climate change risks<br>
-                 - International competition in tourism and services</p>")
-      )
+        list(
+          plotOutput("strengths_plot"),
+          plotOutput("weaknesses_plot"),
+          HTML("<h3>SWOT Analysis of Northern Cyprus</h3>
+            <h4>Strengths</h4>
+            <p>- Strategic geographic location<br>
+               - Robust tourism sector<br>
+               - Mature service industries<br>
+               - EU membership benefits</p>
+            <h4>Weaknesses</h4>
+            <p>- Limited economic diversity<br>
+               - Political division<br>
+               - Relatively high unemployment rate<br>
+               - Limited natural resources</p>
+            <h4>Opportunities</h4>
+            <p>- Development of renewable energy<br>
+               - Diversification in tourism<br>
+               - Regional cooperation<br>
+               - Technology and innovation</p>
+            <h4>Threats</h4>
+            <p>- Regional instability<br>
+               - Impact of global economic fluctuations<br>
+               - Climate change risks<br>
+               - International competition in tourism and services</p>")
+      ))
     }
   })
   
@@ -510,8 +570,7 @@ server <- function(input, output) {
     plot_map
   })
   
-  # Output for the PNG image
-  northern_cyprus <- st_read("northern cyprus.geojson", quiet = TRUE)
+
   
   output$map <- renderLeaflet({
     leaflet(data = northern_cyprus) %>%
@@ -600,9 +659,18 @@ server <- function(input, output) {
   # Output for Education Expenditure comparison image
   output$summary_plot <- renderPlot({
     img <- readPNG("125.png")
-    plot(1:2, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1))
-    rasterImage(img, 0, 0, 1, 1)
+    plot(1:2, type = "n", main = "PNG Image")
+    rasterImage(img, 1, 1, 2, 2)
+  
   })
   
+  # Output for Education Expenditure comparison image
+  output$strengths_plot <- renderPlot({
+    strengths_plot
+  })
+  # Output for Education Expenditure comparison image
+  output$weaknesses_plot <- renderPlot({
+    weaknesses_plot
+  })
   
 }

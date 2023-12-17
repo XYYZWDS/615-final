@@ -1,12 +1,12 @@
-name: YX-final
-title: YX-final
+name: YX-final-project
+title: YX-final-project
 username: xyyzwds
 account: xyyzwds
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 10812938
-bundleId: 8057562
-url: https://xyyzwds.shinyapps.io/YX-final/
+appId: 10813378
+bundleId: 8057924
+url: https://xyyzwds.shinyapps.io/YX-final-project/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE

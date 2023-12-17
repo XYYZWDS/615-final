@@ -423,11 +423,74 @@ By comparing the data of GDP, unemployment rate, and education expenditure betwe
 
 
 
+# SWOT
+
+```{r}
+
+data <- read.csv("Northern Cyprus/API_CYP_DS2_en_csv_v2_6260326.csv", skip=4)  
+
+
+strengths_indicators <- data %>% 
+  filter(Indicator.Name %in% c('GDP, PPP (current international $)', 
+                               'GNI, PPP (current international $)',
+                               'Imports of goods, services and primary income (BoP, current US$)',
+                               'Exports of goods, services and primary income (BoP, current US$)'))
+
+weaknesses_indicators <- data %>% 
+  filter(Indicator.Name %in% c('Foreign direct investment, net (BoP, current US$)', 
+                               'Current account balance (BoP, current US$)'))
+
+
+
+strengths_plot_data <- strengths_indicators %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Value") %>%
+  mutate(Year = as.numeric(sub("X", "", Year)))  
+
+
+weaknesses_plot_data <- weaknesses_indicators %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Value") %>%
+  mutate(Year = as.numeric(sub("X", "", Year)))
+
+strengths_plot <- ggplot(strengths_plot_data, aes(x = Year, y = Value, color = Indicator.Name)) +
+  geom_line() +
+  labs(title = "Strengths: Key Economic Indicators", x = "Year", y = "Value (US$)") +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",  # 将图例移动到底部
+    legend.text = element_text(size = 10),  # 调整图例文字大小
+    legend.title = element_text(size = 12),  # 调整图例标题大小
+    legend.key.size = unit(1, 'lines'),  # 调整图例键的大小
+    legend.box = "vertical",  # 将图例框设置为垂直
+    legend.margin = margin(t = 0, b = 0, l = 0, r = 0),  # 调整图例边界
+    plot.margin = unit(c(1, 1, 1, 1), "cm")  # 调整图表边界
+  ) +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))  
+
+weaknesses_plot <- ggplot(weaknesses_plot_data, aes(x = Year, y = Value, color = Indicator.Name)) +
+  geom_line() +
+  labs(title = "Weaknesses: Investment and Account Balance", x = "Year", y = "Value (US$)") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 8),  
+        legend.title = element_text(size = 10))  
+
+strengths_plot
+weaknesses_plot 
+
+
+```
+
+
+
+
 # CODE for Shiny R website 
 
 
 
-```{r,r,echo=FALSE,results='hide',message=FALSE}
+
+
+
+```{r,echo=FALSE,results='hide',message=FALSE}
 
 
 # Define UI for application
@@ -792,4 +855,5 @@ shinyApp(ui = ui, server = server)
 
 
 ```
+
 
