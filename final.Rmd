@@ -2,8 +2,10 @@
 title: "Untitled"
 author: "Yang Xiao"
 date: "2023-12-16"
-output: html_document
+output: flexdashboard::flex_dashboard:
+  runtime: shiny
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,7 +24,7 @@ library(rnaturalearthdata)
 
 # Map
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 
 # Get world map data
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -56,7 +58,7 @@ plot_map
 
 
 
-img <- readPNG("C:/Users/xiaoy/Desktop/615 R/final/123.png")
+img <- readPNG("123.png")
 
 
 plot(1:2, type = "n", main = "PNG Image")
@@ -74,14 +76,14 @@ rasterImage(img, 1, 1, 2, 2)
 
 # Economy
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 
 
 
 
 
 
-data <- read.csv("C:/Users/xiaoy/Desktop/615 R/final/Northern Cyprus/API_CYP_DS2_en_csv_v2_6260326.csv", skip=4)
+data <- read.csv("Northern Cyprus/API_CYP_DS2_en_csv_v2_6260326.csv", skip=4)
 
 # 1 GDP
 economic_indicators <- subset(data, grepl("GDP|economy|inflation|unemployment|exports|imports|debt", data$Indicator.Name))
@@ -177,7 +179,7 @@ These two indicators together reveal the overall stability of Cyprus's macroecon
 
 # population
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 
 
 population_indicators <- data[grep("population|birth|death", data$Indicator.Name, ignore.case = TRUE), ]
@@ -247,9 +249,9 @@ key_data <- data_frame %>%
 
 # Comparison
 
-```{r}
-cyprus_data <- read.csv("C:/Users/xiaoy/Desktop/615 R/final/Northern Cyprus/API_CYP_DS2_en_csv_v2_6260326.csv", skip = 4)
-greece_data <- read.csv("C:/Users/xiaoy/Desktop/615 R/final/Greece//API_GRC_DS2_en_csv_v2_6230020.csv", skip = 4)
+```{r,echo=FALSE,results='hide',message=FALSE}
+cyprus_data <- read.csv("Northern Cyprus/API_CYP_DS2_en_csv_v2_6260326.csv", skip = 4)
+greece_data <- read.csv("Greece//API_GRC_DS2_en_csv_v2_6230020.csv", skip = 4)
 
 
 # Extracting GDP, Unemployment rate, and Education expenditure data
@@ -424,7 +426,7 @@ By comparing the data of GDP, unemployment rate, and education expenditure betwe
 
 
 
-```{r}
+```{r,r,echo=FALSE,results='hide',message=FALSE}
 
 
 # Define UI for application
@@ -687,18 +689,18 @@ rsconnect::setAccountInfo(
   
   # Output for the world map
   output$mapPlot <- renderPlot({
-   img1 <- readPNG("C:/Users/xiaoy/Desktop/615 R/final/124.png")
+   img1 <- readPNG("124.png")
    plot(1:2, type = "n", main = "PNG Image")
-    rasterImage(img1, 1, 1, 2, 2)
+    rasterImage(img1, 2, 2, 2, 2)
   })
   
   # Output for the PNG image
   output$pngPlot <- renderPlot({
-    img <- readPNG("C:/Users/xiaoy/Desktop/615 R/final/123.png")
+    img <- readPNG("123.png")
     
     # Display the PNG image
     plot(1:2, type = "n", main = "PNG Image")
-    rasterImage(img, 1, 1, 2, 2)
+    rasterImage(img, 2, 2, 2, 2)
   })
   
   # Output for GDP Growth Rate
