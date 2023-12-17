@@ -1,0 +1,13 @@
+name: final
+title: final
+username: xyyzwds
+account: xyyzwds
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10812732
+bundleId: 8057255
+url: https://xyyzwds.shinyapps.io/final/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: assingmentList.csv|UNdata_Export_20231216_174728869.xml
