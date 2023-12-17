@@ -17,6 +17,7 @@ library(png)
 library(rsconnect)
 library(shiny)
 library(rnaturalearthdata)
+library(shinythemes)
 ```
 
 
@@ -431,6 +432,13 @@ By comparing the data of GDP, unemployment rate, and education expenditure betwe
 
 # Define UI for application
 ui <- fluidPage(
+  
+  theme = shinytheme("cerulean"),
+   tags$style(HTML('
+    body {
+      background-color:#f0f0f0;
+    }
+  ')),
   # Application title
   titlePanel("Cyprus"),
   
@@ -481,7 +489,7 @@ rsconnect::setAccountInfo(
 ")
         ),
         tabPanel("Map 2",
-          plotOutput("pngPlot"),
+         leafletOutput("map"),
           HTML("<h3>Detailed Map of Cyprus</h3>
 <p>
     <strong>The second image appears to be a more detailed map of Cyprus itself,</strong> highlighting various administrative regions or cities within the island. Notable features of this map include:
@@ -691,16 +699,13 @@ rsconnect::setAccountInfo(
   output$mapPlot <- renderPlot({
    img1 <- readPNG("124.png")
    plot(1:2, type = "n", main = "PNG Image")
-    rasterImage(img1, 2, 2, 2, 2)
+    rasterImage(img1, 1, 1, 2, 2)
   })
   
-  # Output for the PNG image
-  output$pngPlot <- renderPlot({
-    img <- readPNG("123.png")
-    
-    # Display the PNG image
-    plot(1:2, type = "n", main = "PNG Image")
-    rasterImage(img, 2, 2, 2, 2)
+ output$map <- renderLeaflet({
+    leaflet() %>% 
+      addTiles() %>% 
+      addGeoJSON(geojson = readLines("northern cyprus.geojson")) 
   })
   
   # Output for GDP Growth Rate

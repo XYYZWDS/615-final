@@ -5,7 +5,7 @@ account: xyyzwds
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10812938
-bundleId: 8057394
+bundleId: 8057562
 url: https://xyyzwds.shinyapps.io/YX-final/
 version: 1
 asMultiple: FALSE

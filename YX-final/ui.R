@@ -1,10 +1,16 @@
 
 
-
+library(leaflet)
 library(shiny)
 
 # Define UI for application
 ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  tags$style(HTML('
+    body {
+      background-color:#f0f0f0;
+    }
+  ')),
   # Application title
   titlePanel("Cyprus"),
   

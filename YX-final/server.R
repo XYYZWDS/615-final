@@ -6,7 +6,7 @@ library(png)
 library(rsconnect)
 library(shiny)
 library(rnaturalearthdata)
-
+library(leaflet)
 
 # Get world map data
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -297,7 +297,8 @@ server <- function(input, output) {
 ")
         ),
         tabPanel("Map 2",
-                 plotOutput("pngPlot"),
+                 leafletOutput("map"),
+                 
                  HTML("<h3>Detailed Map of Cyprus</h3>
 <p>
     <strong>The second image appears to be a more detailed map of Cyprus itself,</strong> highlighting various administrative regions or cities within the island. Notable features of this map include:
@@ -458,6 +459,7 @@ server <- function(input, output) {
 </ul>
 ")
         ), tabPanel("Summary",
+                    plotOutput("summary_plot"),
                     HTML("<h3>Summary of Comparative Analysis</h3>
 <p>
     By comparing GDP, unemployment rates, and education expenditure between Cyprus and Greece, we can discern:
@@ -509,12 +511,12 @@ server <- function(input, output) {
   })
   
   # Output for the PNG image
-  output$pngPlot <- renderPlot({
-    img <- readPNG("123.png")
-    
-    # Display the PNG image
-    plot(1:2, type = "n", main = "PNG Image", asp = 0.66)
-    rasterImage(img, 1, 1, 2, 2)
+  northern_cyprus <- st_read("northern cyprus.geojson", quiet = TRUE)
+  
+  output$map <- renderLeaflet({
+    leaflet(data = northern_cyprus) %>%
+      addTiles() %>%
+      addPolygons()  
   })
   
   # Output for GDP Growth Rate
@@ -593,4 +595,14 @@ server <- function(input, output) {
   output$p_edu_car <- renderPlot({
     p_edu_car
   })
+  
+  
+  # Output for Education Expenditure comparison image
+  output$summary_plot <- renderPlot({
+    img <- readPNG("125.png")
+    plot(1:2, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1))
+    rasterImage(img, 0, 0, 1, 1)
+  })
+  
+  
 }
